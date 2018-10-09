@@ -155,6 +155,10 @@ public class Log4jAppender extends AppenderSkeleton
         getS3().setSecretKey(secretKey);
     }
 
+    public void setS3AwsSessionToken(String sessionToken) {
+        getS3().setSessionToken(sessionToken);
+    }
+
     public void setS3Compression(String enable) {
         s3Compression = Boolean.parseBoolean(enable);
     }
@@ -227,9 +231,17 @@ public class Log4jAppender extends AppenderSkeleton
             java.net.InetAddress addr = java.net.InetAddress.getLocalHost();
             hostName = addr.getHostName();
             if (null != s3) {
-                AwsClientBuilder builder =
-                    new AwsClientBuilder(s3.getRegion(),
-                        s3.getAccessKey(), s3.getSecretKey());
+                AwsClientBuilder builder;
+                if (null == s3.getSessionToken()) {
+                    builder = new AwsClientBuilder(s3.getRegion(),
+                            s3.getAccessKey(), s3.getSecretKey());
+                }
+                else {
+                    builder = new AwsClientBuilder(s3.getRegion(),
+                        s3.getAccessKey(),
+                        s3.getSecretKey(),
+                        s3.getSessionToken());
+                }
                 s3Client = (AmazonS3Client) builder.build(AmazonS3Client.class);
             }
             initStagingLog();

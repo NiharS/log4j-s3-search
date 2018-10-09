@@ -53,6 +53,9 @@ public class Log4j2AppenderBuilder extends org.apache.logging.log4j.core.appende
     private String s3AwsSecret;
 
     @PluginBuilderAttribute
+    private String s3AwsSessionToken = null;
+
+    @PluginBuilderAttribute
     private String s3Compression;
 
     // Solr properties
@@ -112,12 +115,14 @@ public class Log4j2AppenderBuilder extends org.apache.logging.log4j.core.appende
             config.setRegion(s3Region);
             config.setAccessKey(s3AwsKey);
             config.setSecretKey(s3AwsSecret);
+            config.setSessionToken(s3AwsSessionToken);
             s3 = Optional.of(config);
         }
         return s3.map(config ->
             new AwsClientBuilder(config.getRegion(),
                                  config.getAccessKey(),
-                                 config.getSecretKey()).build(AmazonS3Client.class));
+                                 config.getSecretKey(),
+                                 config.getSessionToken()).build(AmazonS3Client.class));
     }
 
     static Optional<SolrConfiguration> getSolrConfigurationIfEnabled(String solrUrl) {

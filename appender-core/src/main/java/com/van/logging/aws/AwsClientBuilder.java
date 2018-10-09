@@ -21,6 +21,7 @@ import java.lang.reflect.Constructor;
 public class AwsClientBuilder {
     private final String accessKey;
     private final String secretKey;
+    private final String sessionToken;
     private final Region region;
 
     /**
@@ -42,9 +43,14 @@ public class AwsClientBuilder {
      * @param secretKey the secret key to use for credentials
      */
     public AwsClientBuilder(Region region, String accessKey, String secretKey) {
+        this(region, accessKey, secretKey, null);
+    }
+
+    public AwsClientBuilder(Region region, String accessKey, String secretKey, String sessionToken) {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
         this.region = region;
+        this.sessionToken = sessionToken;
     }
 
     /**
@@ -114,7 +120,11 @@ public class AwsClientBuilder {
                 // the more general environment
                 new AWSCredentialsProvider() {
                     public AWSCredentials getCredentials() {
-                        return new BasicAWSCredentials(accessKey, secretKey);
+                        if (null == sessionToken) {
+                            return new BasicAWSCredentials(accessKey, secretKey);
+                        } else {
+                            return new BasicSessionCredentials(accessKey, secretKey, sessionToken);
+                        }
                     }
 
                     public void refresh() {
